@@ -32,9 +32,9 @@ import scala.util.Try
 object pbd {
 
   import pbdirect._
+  import ProtoDefault._
 
-  implicit def defaultDirectPBMarshallers[A <: AnyRef: PBWriter: PBReader: ProtoDefault]: Marshaller[
-    A] =
+  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader: ProtoDefault]: Marshaller[A] =
     new Marshaller[A] {
 
       override def parse(stream: InputStream): A =

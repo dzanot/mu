@@ -32,7 +32,6 @@ class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
   case class NestedThing(lt: ListThing, i: Int)
   case class ListThing(l: List[Int], o: Option[String])
 
-
   private val expectedString = "12345"
 
   private val emptyInputStream: InputStream = new ByteArrayInputStream(Array())
@@ -43,31 +42,11 @@ class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
   "Default pbd marshaller" should {
 
     "handle empty streams by filling in the default value" in {
-      import cats.derived.auto.monoid._
-
-      case class FloatMessage(v: Float)
-      testDefault[FloatMessage](FloatMessage(0.0f))
-
-      case class DoubleMessage(v: Double)
-      testDefault[DoubleMessage](DoubleMessage(0.0))
-
-//      implicit val monoidBoolean: Monoid[Boolean] = new Monoid[Boolean] {
-//        override def empty: Boolean = false
-//
-//        override def combine(x: Boolean, y: Boolean): Boolean = ???
-//      }
-//
-//      case class BooleanMessage(v: Boolean)
-//      testDefault[BooleanMessage](BooleanMessage(false))
-
-      case class IntMessage(v: Int)
-      testDefault[IntMessage](IntMessage(0))
-
-      case class LongMessage(v: Long)
-      testDefault[LongMessage](LongMessage(0))
-
-      case class StringMessage(v: String)
-      testDefault[StringMessage](StringMessage(""))
+      testDefault[Double](0.0)
+      testDefault[Boolean](false)
+      testDefault[Int](0)
+      testDefault[Long](0)
+      testDefault[String]("")
     }
 
     "handle empty streams by filling in the default value when a ProtoDefault typeclass exists" in {
@@ -111,6 +90,14 @@ class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
       import cats.derived.auto.monoid._
 
       testDefault[NestedThing](NestedThing(ListThing(List(), None), 0))
+    }
+    "derive boolean thing" in {
+      import cats.implicits._
+      case class BIS(b: Boolean, i: Int, s: String)
+
+      implicit val bM: alleycats.Empty[BIS] = cats.derived.semi.empty
+
+      testDefault(BIS(false, 0, ""))
     }
   }
 }
