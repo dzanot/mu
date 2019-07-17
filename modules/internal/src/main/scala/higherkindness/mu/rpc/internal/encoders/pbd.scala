@@ -20,6 +20,7 @@ package internal.encoders
 import java.io.{ByteArrayInputStream, InputStream}
 import java.time.{Instant, LocalDate, LocalDateTime}
 
+import cats.data.NonEmptyList
 import cats.instances._
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
@@ -32,7 +33,8 @@ object pbd {
 
   import pbdirect._
 
-  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader: ProtoDefault]: Marshaller[A] =
+  implicit def defaultDirectPBMarshallers[A <: AnyRef: PBWriter: PBReader: ProtoDefault]: Marshaller[
+    A] =
     new Marshaller[A] {
 
       override def parse(stream: InputStream): A =
@@ -45,28 +47,33 @@ object pbd {
             .pbTo[A]
         ).getOrElse(ProtoDefault[A].default)
 
-      override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
+      override def stream(value: A): InputStream =
+        new ByteArrayInputStream(value.toPB)
 
     }
 
   object bigDecimal {
 
     implicit object BigDecimalWriter extends PBWriter[BigDecimal] {
-      override def writeTo(index: Int, value: BigDecimal, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, BigDecimalUtil.bigDecimalToByte(value))
+      override def writeTo(
+          index: NonEmptyList[Int],
+          value: BigDecimal,
+          out: CodedOutputStream): Unit =
+        out.writeByteArray(index.head, BigDecimalUtil.bigDecimalToByte(value))
     }
 
-    implicit object BigDecimalReader extends PBReader[BigDecimal] {
-      override def read(input: CodedInputStream): BigDecimal =
-        BigDecimalUtil.byteToBigDecimal(input.readByteArray())
-    }
   }
 
   object javatime {
 
     implicit object LocalDateWriter extends PBWriter[LocalDate] {
-      override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
+      override def writeTo(
+          index: NonEmptyList[Int],
+          value: LocalDate,
+          out: CodedOutputStream): Unit =
+        out.writeByteArray(
+          index.head,
+          EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
     }
 
     implicit object LocalDateReader extends PBReader[LocalDate] {
@@ -75,9 +82,12 @@ object pbd {
     }
 
     implicit object LocalDateTimeWriter extends PBWriter[LocalDateTime] {
-      override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
+      override def writeTo(
+          index: NonEmptyList[Int],
+          value: LocalDateTime,
+          out: CodedOutputStream): Unit =
         out.writeByteArray(
-          index,
+          index.head,
           EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value)))
     }
 
@@ -87,8 +97,10 @@ object pbd {
     }
 
     implicit object InstantWriter extends PBWriter[Instant] {
-      override def writeTo(index: Int, value: Instant, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
+      override def writeTo(index: NonEmptyList[Int], value: Instant, out: CodedOutputStream): Unit =
+        out.writeByteArray(
+          index.head,
+          EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
     }
 
     implicit object InstantReader extends PBReader[Instant] {

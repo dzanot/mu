@@ -28,6 +28,11 @@ object ProtoDefault {
   implicit def protoDefaultFromMonoid[A](implicit M: Monoid[A]): ProtoDefault[A] =
     new ProtoDefault[A] { def default: A = M.empty }
 
+  implicit val monoidBoolean: Monoid[Boolean] = new Monoid[Boolean] {
+    override def empty: Boolean = false
+
+    override def combine(x: Boolean, y: Boolean): Boolean = ???
+  }
   implicit val protoDefaultBoolean: ProtoDefault[Boolean] = new ProtoDefault[Boolean] {
     def default: Boolean = false
   }
