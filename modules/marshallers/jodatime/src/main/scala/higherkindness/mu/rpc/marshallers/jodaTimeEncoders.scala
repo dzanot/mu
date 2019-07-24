@@ -19,6 +19,7 @@ package marshallers
 
 import java.io.{ByteArrayInputStream, InputStream}
 
+import cats.data.NonEmptyList
 import com.google.common.io.ByteStreams
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.EncoderUtil
@@ -27,6 +28,7 @@ import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Field
 import org.joda.time.{LocalDate, LocalDateTime}
+import pbdirect.LowPriorityPBWriterImplicits.SizeWithoutTag
 
 object jodaTimeEncoders {
 
@@ -35,9 +37,21 @@ object jodaTimeEncoders {
     import pbdirect._
 
     implicit object JodaLocalDateWriter extends PBWriter[LocalDate] {
-      override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
+      override def writeTo(
+          index: NonEmptyList[Int],
+          value: LocalDate,
+          out: CodedOutputStream,
+          sizes: SizeWithoutTag): Unit =
         out.writeByteArray(
-          index,
+          index.head,
+          EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))
+
+      override def writtenBytesSize(
+          index: NonEmptyList[Int],
+          value: LocalDate,
+          sizes: SizeWithoutTag): Int =
+        CodedOutputStream.computeByteArraySize(
+          index.head,
           EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))
     }
 
@@ -47,9 +61,21 @@ object jodaTimeEncoders {
     }
 
     implicit object JodaLocalDateTimeWriter extends PBWriter[LocalDateTime] {
-      override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
+      override def writeTo(
+          index: NonEmptyList[Int],
+          value: LocalDateTime,
+          out: CodedOutputStream,
+          sizes: SizeWithoutTag): Unit =
         out.writeByteArray(
-          index,
+          index.head,
+          EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
+
+      override def writtenBytesSize(
+          index: NonEmptyList[Int],
+          value: LocalDateTime,
+          sizes: SizeWithoutTag): Int =
+        CodedOutputStream.computeByteArraySize(
+          index.head,
           EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
     }
 
