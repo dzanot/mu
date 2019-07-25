@@ -228,7 +228,10 @@ object serviceImpl {
 
       val encodersImport = serializationType match {
         case Protobuf =>
-          List(q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._")
+          List(
+            q"import _root_.higherkindness.mu.rpc.internal.encoders.protoless._",
+            q"import _root_.io.protoless.generic.auto._"
+          )
         case Avro =>
           List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avro._")
         case AvroWithSchema =>

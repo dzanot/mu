@@ -49,7 +49,7 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     case class Response(date: LocalDate, label: String, check: Boolean)
 
     object ProtobufService {
-      import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._
+      import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.protoless._
       @service(Protobuf)
       trait Def[F[_]] {
         def jodaLocalDateProto(date: LocalDate): F[LocalDate]

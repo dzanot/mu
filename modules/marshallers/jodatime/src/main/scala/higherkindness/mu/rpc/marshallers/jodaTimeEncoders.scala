@@ -24,6 +24,9 @@ import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.EncoderUtil
 import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
 import io.grpc.MethodDescriptor.Marshaller
+import io.protoless.fields.{FieldDecoder, FieldEncoder}
+import io.protoless.messages.Decoder.Result
+import io.protoless.messages.Encoder
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Field
 import org.joda.time.{LocalDate, LocalDateTime}
@@ -58,6 +61,33 @@ object jodaTimeEncoders {
         JodaTimeUtil.longToJodaLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray()))
     }
 
+  }
+
+  object protoless {
+    implicit object JodaLocalDateEncoder extends FieldEncoder[LocalDate] {
+      override def write(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
+        out.writeByteArray(
+          index,
+          EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))
+    }
+
+    implicit object JodaLocalDateDecoder extends FieldDecoder[LocalDate] {
+      override def read(input: CodedInputStream, index: Int): Result[LocalDate] =
+        Right(JodaTimeUtil.intToJodaLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray())))
+    }
+
+    implicit object JodaLocalDateTimeEncoder extends FieldEncoder[LocalDateTime] {
+      override def write(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
+        out.writeByteArray(
+          index,
+          EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
+    }
+
+    implicit object JodaLocalDateTimeDecoder extends FieldDecoder[LocalDateTime] {
+      override def read(input: CodedInputStream, index: Int): Result[LocalDateTime] =
+        Right(
+          JodaTimeUtil.longToJodaLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray())))
+    }
   }
 
   object avro {

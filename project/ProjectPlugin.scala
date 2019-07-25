@@ -70,6 +70,8 @@ object ProjectPlugin extends AutoPlugin {
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
         "com.47deg" %% "pbdirect" % V.pbdirect,
+        "io.protoless" %% "protoless-core" % "0.0.8-SNAPSHOT",
+        "io.protoless" %% "protoless-generic" % "0.0.8-SNAPSHOT",
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
