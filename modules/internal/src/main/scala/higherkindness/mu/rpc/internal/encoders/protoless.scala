@@ -31,7 +31,6 @@ import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTim
 import io.grpc.MethodDescriptor.Marshaller
 import io.protoless.messages.{Decoder, Encoder}
 import io.protoless._
-import io.protoless.fields.{FieldDecoder, FieldEncoder}
 import io.protoless.messages.Decoder.Result
 
 object protoless
@@ -54,7 +53,9 @@ object protoless
   }
   implicit object BooleanEncoder extends Encoder[Boolean] {
     override def encode(value: Boolean, output: CodedOutputStream): Unit =
-      output.writeBoolNoTag(value)
+      //output.writeBoolNoTag(value)
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+        "RPC argument must be a message type")
   }
 
   object bigDecimal {
@@ -69,35 +70,34 @@ object protoless
   }
 
   object javatime {
-    implicit object LocalDateEncoder extends FieldEncoder[LocalDate] {
-      override def write(index: Int, value: LocalDate, output: CodedOutputStream): Unit =
-        output.writeByteArray(index, EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
+    implicit object LocalDateEncoder extends Encoder[LocalDate] {
+      override def encode(value: LocalDate, output: CodedOutputStream): Unit =
+        output.writeByteArrayNoTag(EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
     }
 
-    implicit object LocalDateDecoder extends FieldDecoder[LocalDate] {
-      override def read(input: CodedInputStream, index: Int): Result[LocalDate] =
+    implicit object LocalDateDecoder extends Decoder[LocalDate] {
+      override def decode(input: CodedInputStream): Result[LocalDate] =
         Right(JavaTimeUtil.intToLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray())))
     }
 
-    implicit object LocalDateTimeEncoder extends FieldEncoder[LocalDateTime] {
-      override def write(index: Int, value: LocalDateTime, output: CodedOutputStream): Unit =
-        output.writeByteArray(
-          index,
+    implicit object LocalDateTimeEncoder extends Encoder[LocalDateTime] {
+      override def encode(value: LocalDateTime, output: CodedOutputStream): Unit =
+        output.writeByteArrayNoTag(
           EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value)))
     }
 
-    implicit object LocalDateTimeDecoder extends FieldDecoder[LocalDateTime] {
-      override def read(input: CodedInputStream, index: Int): Result[LocalDateTime] =
+    implicit object LocalDateTimeDecoder extends Decoder[LocalDateTime] {
+      override def decode(input: CodedInputStream): Result[LocalDateTime] =
         Right(JavaTimeUtil.longToLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray())))
     }
 
-    implicit object InstantEncoder extends FieldEncoder[Instant] {
-      override def write(index: Int, value: Instant, output: CodedOutputStream): Unit =
-        output.writeByteArray(index, EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
+    implicit object InstantEncoder extends Encoder[Instant] {
+      override def encode(value: Instant, output: CodedOutputStream): Unit =
+        output.writeByteArrayNoTag(EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
     }
 
-    implicit object InstantDecoder extends FieldDecoder[Instant] {
-      override def read(input: CodedInputStream, index: Int): Result[Instant] =
+    implicit object InstantDecoder extends Decoder[Instant] {
+      override def decode(input: CodedInputStream): Result[Instant] =
         Right(JavaTimeUtil.longToInstant(EncoderUtil.byteArrayToLong(input.readByteArray())))
     }
   }
