@@ -23,7 +23,7 @@ import org.scalatest._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
-import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._
+import higherkindness.mu.rpc.internal.encoders.protoless.bigDecimal._
 import higherkindness.mu.rpc.protocol.Utils._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Prop._

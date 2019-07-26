@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc.internal.encoders
 
 import cats.instances._
-import java.io.{ByteArrayInputStream, InputStream, PipedInputStream, PipedOutputStream}
+import java.io.{ByteArrayInputStream, InputStream}
 import java.time.{Instant, LocalDate, LocalDateTime}
 
 import cats.instances.{
@@ -27,7 +27,7 @@ import cats.instances.{
   OptionInstancesBinCompat0
 }
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
-import higherkindness.mu.rpc.internal.util.{EncoderUtil, JavaTimeUtil}
+import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
 import io.protoless.messages.{Decoder, Encoder}
 import io.protoless._
@@ -48,9 +48,24 @@ object protoless
         Decoder[A].decode(stream).fold(fa => throw fa, identity)
     }
 
-  object bigdecimal {
-    implicit val BigDecimalEncoder = io.protoless.fields.FieldEncoder.encodeBigDecimal
-    implicit val BigDecimalDecoder = io.protoless.fields.FieldDecoder.decodeBigDecimal
+  implicit object BooleanDecoder extends Decoder[Boolean] {
+    override def decode(input: CodedInputStream): Result[Boolean] =
+      Right(input.readBool())
+  }
+  implicit object BooleanEncoder extends Encoder[Boolean] {
+    override def encode(value: Boolean, output: CodedOutputStream): Unit =
+      output.writeBoolNoTag(value)
+  }
+
+  object bigDecimal {
+    implicit object BigDecimalEncoder extends Encoder[BigDecimal] {
+      override def encode(value: BigDecimal, output: CodedOutputStream): Unit =
+        output.writeByteArrayNoTag(BigDecimalUtil.bigDecimalToByte(value))
+    }
+    implicit object BigDecimalDecoder extends Decoder[BigDecimal] {
+      override def decode(input: CodedInputStream): Result[BigDecimal] =
+        Right(BigDecimalUtil.byteToBigDecimal(input.readByteArray()))
+    }
   }
 
   object javatime {
