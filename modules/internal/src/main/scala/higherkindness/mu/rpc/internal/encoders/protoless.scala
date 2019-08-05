@@ -31,6 +31,7 @@ import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTim
 import io.grpc.MethodDescriptor.Marshaller
 import io.protoless.messages.{Decoder, Encoder}
 import io.protoless._
+import io.protoless.fields.{FieldDecoder, FieldEncoder}
 import io.protoless.messages.Decoder.Result
 
 object protoless
@@ -67,9 +68,30 @@ object protoless
       override def decode(input: CodedInputStream): Result[BigDecimal] =
         Right(BigDecimalUtil.byteToBigDecimal(input.readByteArray()))
     }
+    object fields {
+      implicit val bigDecimalDecoder: FieldDecoder[BigDecimal] = FieldDecoder[BigDecimal]
+      implicit val bigDecimalEncoder: FieldEncoder[BigDecimal] = FieldEncoder[BigDecimal]
+    }
   }
 
   object javatime {
+    object fields {
+      implicit val localDateEncoder: FieldEncoder[LocalDate] =
+        FieldEncoder[Int].contramap(JavaTimeUtil.localDateToInt)
+      implicit val localDateDecoder: FieldDecoder[LocalDate] =
+        FieldDecoder[Int].map(JavaTimeUtil.intToLocalDate)
+
+      implicit val localDateTimeEncoder: FieldEncoder[LocalDateTime] =
+        FieldEncoder[Long].contramap(JavaTimeUtil.localDateTimeToLong)
+      implicit val localDateTimeDecoder: FieldDecoder[LocalDateTime] =
+        FieldDecoder[Long].map(JavaTimeUtil.longToLocalDateTime)
+
+      implicit val instantEncoder: FieldEncoder[Instant] =
+        FieldEncoder[Long].contramap(JavaTimeUtil.instantToLong)
+      implicit val instantDecoder: FieldDecoder[Instant] =
+        FieldDecoder[Long].map(JavaTimeUtil.longToInstant)
+    }
+
     implicit object LocalDateEncoder extends Encoder[LocalDate] {
       override def encode(value: LocalDate, output: CodedOutputStream): Unit =
         output.writeByteArrayNoTag(EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))

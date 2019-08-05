@@ -65,6 +65,18 @@ object jodaTimeEncoders {
 
   object protoless {
 
+    object fields {
+      implicit val jodaLocalDateTimeDecoder: FieldDecoder[LocalDateTime] =
+        FieldDecoder[Long].map(JodaTimeUtil.longToJodaLocalDateTime)
+      implicit val jodaLocalDateTimeEncoder: FieldEncoder[LocalDateTime] =
+        FieldEncoder[Long].contramap(JodaTimeUtil.jodaLocalDatetimeToLong)
+
+      implicit val jodaLocalDateDecoder: FieldDecoder[LocalDate] =
+        FieldDecoder[Int].map(JodaTimeUtil.intToJodaLocalDate)
+      implicit val jodaLocalDateEncoder: FieldEncoder[LocalDate] =
+        FieldEncoder[Int].contramap(JodaTimeUtil.jodaLocalDateToInt)
+    }
+
     implicit object JodaLocalDateEncoder extends Encoder[LocalDate] {
       override def encode(value: LocalDate, out: CodedOutputStream): Unit =
         out.writeByteArrayNoTag(EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))

@@ -27,7 +27,7 @@ import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.internal.encoders.avro.javatime._
 import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._
-import higherkindness.mu.rpc.internal.encoders.protoless.javatime._
+import higherkindness.mu.rpc.internal.encoders.protoless.javatime.fields._
 import higherkindness.mu.rpc.protocol.Utils._
 import org.scalacheck.Arbitrary
 import org.scalatest._
